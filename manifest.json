@@ -1,0 +1,11 @@
+{
+  "id": "month-finance",
+  "name": "Month Finance",
+  "version": "1.0.0",
+  "minAppVersion": "1.11.0",
+  "description": "Track month income and expenses in a markdown table: balance, spending charts by category and a summary dashboard.",
+  "author": "kharbacheuski",
+  "authorUrl": "https://github.com/kharbacheuski",
+  "fundingUrl": "",
+  "isDesktopOnly": false
+}

@@ -1,0 +1,262 @@
+/* ─────────────────────────────────────────────────────────────
+   Finance Tracker — card UI themed to Obsidian
+   ───────────────────────────────────────────────────────────── */
+
+.props-hidden .markdown-preview-sizer.markdown-preview-section {
+    max-width: var(--file-line-width);
+    padding-bottom: 0 !important;
+}
+
+.finance-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0.75rem auto;
+    max-width: var(--file-line-width);
+}
+
+/* ── Stat cards ─────────────────────────────────────────────── */
+
+.finance-card {
+    background: var(--background-secondary);
+    border-radius: var(--radius-m);
+    padding: 0.9rem 1rem;
+    grid-column: span 2;
+
+    &:nth-of-type(4n),
+    &:nth-of-type(5n) {
+        grid-column: span 3; 
+    }
+}
+
+.finance-cards {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.75rem;
+}
+
+
+.finance-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.finance-stat-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+}
+
+.finance-stat-icon {
+    display: inline-flex;
+}
+
+.finance-stat-value {
+    font-size: var(--font-ui-large);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-normal);
+}
+
+.finance-stat-value.pos {
+    color: var(--color-green, #5cbb6a);
+}
+
+.finance-stat-value.neg {
+    color: var(--color-red, #e53935);
+}
+
+.finance-stat-sub {
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.finance-flow-value {
+    font-size: var(--font-ui-large);
+
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+
+    &.pos, &.neg {
+        font-weight: 700;
+    }
+}
+
+.finance-flow-value.pos {
+    color: var(--color-green, #5cbb6a);
+}
+
+.finance-flow-value.neg {
+    color: var(--color-red, #e53935);
+}
+
+.finance-flow-value.muted {
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+}
+
+/* ── Category chart ─────────────────────────────────────────── */
+
+.finance-card-title {
+    font-size: var(--font-ui-medium);
+    font-weight: 600;
+    margin-bottom: 0.7rem;
+}
+
+.finance-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.finance-bar-row {
+    display: grid;
+    grid-template-columns: minmax(90px, 130px) 1fr 120px;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: var(--font-ui-small);
+}
+
+.finance-bar-label {
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.finance-bar-track {
+    height: 0.55rem;
+    background: var(--background-modifier-border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.finance-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    min-width: 2px;
+    transition: width 0.3s ease;
+}
+
+.finance-bar-value {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
+/* ── Daily expenses chart ──────────────────────────────────── */
+
+.finance-daily-wrap {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 6px;
+    align-items: start;
+}
+
+.finance-daily-yaxis {
+    position: relative;
+    height: 110px;
+}
+
+.finance-daily-ylabel {
+    position: absolute;
+    right: 0;
+    transform: translateY(50%);
+    font-size: var(--font-ui-smaller);
+    line-height: 1;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.finance-daily-body {
+    position: relative;
+}
+
+.finance-daily-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 110px;
+    pointer-events: none;
+}
+
+.finance-daily-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px solid var(--background-modifier-border);
+}
+
+.finance-daily {
+    display: grid;
+    column-gap: 3px;
+}
+
+.finance-daily-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+}
+
+.finance-daily-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    height: 110px;
+}
+
+.finance-daily-bar {
+    width: 40%;
+    max-width: 8px;
+    min-width: 2px;
+    height: 0;
+    background: var(--text-normal);
+    border-radius: 2px 2px 0 0;
+    opacity: 0.95;
+    transition: opacity 0.15s ease;
+}
+
+.finance-daily-cell:hover .finance-daily-bar {
+    opacity: 1;
+}
+
+.finance-daily-x {
+    font-size: var(--font-ui-smaller);
+    line-height: 1;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Empty state & button ───────────────────────────────────── */
+
+.finance-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+    padding: 1.5rem 1rem;
+}
+
+.finance-empty-title {
+    font-size: var(--font-ui-medium);
+    font-weight: 600;
+}
+
+.finance-muted {
+    color: var(--text-muted);
+    font-size: var(--font-ui-small);
+}

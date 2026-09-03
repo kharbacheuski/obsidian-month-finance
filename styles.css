@@ -1,7 +1,3 @@
-/* ─────────────────────────────────────────────────────────────
-   Finance Tracker — card UI themed to Obsidian
-   ───────────────────────────────────────────────────────────── */
-
 .props-hidden .markdown-preview-sizer.markdown-preview-section {
     max-width: var(--file-line-width);
     padding-bottom: 0 !important;
@@ -14,8 +10,6 @@
     margin: 0.75rem auto;
     max-width: var(--file-line-width);
 }
-
-/* ── Stat cards ─────────────────────────────────────────────── */
 
 .finance-card {
     background: var(--background-secondary);
@@ -102,8 +96,6 @@
     color: var(--text-muted);
 }
 
-/* ── Category chart ─────────────────────────────────────────── */
-
 .finance-card-title {
     font-size: var(--font-ui-medium);
     font-weight: 600;
@@ -151,8 +143,6 @@
     font-variant-numeric: tabular-nums;
     color: var(--text-muted);
 }
-
-/* ── Daily expenses chart ──────────────────────────────────── */
 
 .finance-daily-wrap {
     display: grid;
@@ -239,8 +229,6 @@
     color: var(--text-faint);
     font-variant-numeric: tabular-nums;
 }
-
-/* ── Empty state & button ───────────────────────────────────── */
 
 .finance-empty {
     display: flex;

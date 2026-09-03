@@ -19,7 +19,10 @@ export default class FinanceTrackerPlugin extends Plugin {
         });
 
         this.registerMarkdownPostProcessor((el, ctx) => {
-            if (el.closest(".markdown-source-view")) return; 
+            const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+            const state = view?.getState();
+
+            if (state && state.mode == "source") return;
 
             const file = this.app.vault.getAbstractFileByPath(ctx.sourcePath);
             if (!(file instanceof TFile)) return;

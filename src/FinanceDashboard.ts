@@ -156,6 +156,7 @@ export default class FinanceDashboard {
                 icon: "trending-up",
                 label: CURRENT_LOCALE.earnedThisMonth,
                 value: this.formatAmount(this.stats!.totalIncome),
+                sub: this.carryOver > 0 ? `${CURRENT_LOCALE.carryOverLabel}: ${this.formatAmount(this.carryOver)}` : undefined,
                 tone: "pos",
             },
             {
@@ -175,11 +176,10 @@ export default class FinanceDashboard {
                 icon: "wallet",
                 label: CURRENT_LOCALE.balanceLabel,
                 value: this.formatAmount(balance),
-                sub: this.carryOver > 0 ? `${CURRENT_LOCALE.carryOverLabel}: ${this.formatAmount(this.carryOver)}` : undefined,
             },
             {
                 icon: "piggy-bank",
-                label: CURRENT_LOCALE.totalSavingsLabel,
+                label: CURRENT_LOCALE.savingsLabel,
                 value: this.totalSavings.join(" / "),
                 sub: savedThisMonth > 0 ? `${CURRENT_LOCALE.savings}: ${this.formatAmount(savedThisMonth)}` : undefined,
             },

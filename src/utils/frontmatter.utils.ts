@@ -10,7 +10,6 @@ export async function createFinanceNote(app: App): Promise<TFile | null> {
             "finance: true",
             'currency: "$"',
             "totalSavings:",
-            "  - 0.40 ETH",
             "  - 1500 USD",
             "  - 2500 BYN",
             "carryOver: 515",

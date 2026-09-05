@@ -1,6 +1,6 @@
-.props-hidden .markdown-preview-sizer.markdown-preview-section {
-    max-width: var(--file-line-width);
-    padding-bottom: 0 !important;
+.markdown-preview-view:has(.finance-dashboard) .mod-header,
+.cm-editor:has(.finance-dashboard) .mod-header {
+    display: none;
 }
 
 .finance-dashboard {

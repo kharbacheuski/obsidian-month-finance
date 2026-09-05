@@ -1,6 +1,6 @@
 {
 	"name": "month-finance",
-	"version": "2.1.0",
+	"version": "1.0.1",
 	"description": "Track income and expenses in a markdown table with a card dashboard: balance, category charts and summary.",
 	"main": "main.js",
 	"scripts": {

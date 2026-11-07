@@ -12,6 +12,8 @@ export interface Transaction {
 export interface CategoryStat {
     category: string;
     expense: number;
+    label: string;
+    subcategories?: CategoryStat[]
 }
 
 export interface FinanceStats {
@@ -22,6 +24,8 @@ export interface FinanceStats {
     avgDailyExpense: number;
     nonZeroAvgDailyExpense: number;
     count: number;
+    daysElapsed: number;
+    spendDaysCount: number;
     categories: CategoryStat[];
 }
 

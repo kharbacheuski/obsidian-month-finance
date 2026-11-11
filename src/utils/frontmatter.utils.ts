@@ -1,20 +1,31 @@
 import { App, Notice, TFile, normalizePath } from "obsidian";
-import { CURRENT_LOCALE } from "src/locale";
+import { CURRENT_LOCALE } from "../locale";
 
-export async function createFinanceNote(app: App): Promise<TFile | null> {
+export async function createFinanceNote(app: App, currency: string): Promise<TFile | null> {
     try {
         const folder = app.fileManager.getNewFileParent("").path;
-        const path = normalizePath(`${folder}/${new Date().toLocaleDateString()}.md`);
+        // The localized date may contain path separators (e.g. 11/11/2026 on en-US).
+        const baseName = new Date().toLocaleDateString().replace(/[\\/:*?"<>|]/g, "-");
+        let path = normalizePath(`${folder}/${baseName}.md`);
+        let counter = 2;
+        while (app.vault.getAbstractFileByPath(path)) {
+            path = normalizePath(`${folder}/${baseName} ${counter}.md`);
+            counter++;
+        }
+
         const content = [
             "---",
             "finance: true",
-            'currency: "$"',
+            `currency: ${JSON.stringify(currency)}`,
             "totalSavings:",
             "  - 1500 USD",
             "  - 2500 BYN",
             "carryOver: 515",
-            `cssclasses: 
-              - props-hidden`,
+            "budget:",
+            "  Food: 900",
+            "  Transport: 120",
+            "cssclasses:",
+            "  - props-hidden",
             "---",
             "",
             "| Day | Type | Category | Name | Amount |",

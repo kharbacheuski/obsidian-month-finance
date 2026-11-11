@@ -1,9 +1,9 @@
-export const RU: Record<string, string> = {
+import type { Locale } from "./en";
+
+export const RU: Locale = {
     createFinance: "Создать финансовую заметку",
     failedCreateFinance: "Не удалось создать финансовую заметку. Попробуйте ещё раз.",
 
-    incomeLabel: "Доход за месяц",
-    exspenseLabel: "Расход за месяц",
     balanceLabel: "Остаток средств",
     carryOverLabel: "Остаток с прошлого месяца",
     spentThisMonth: "Потрачено за месяц",
@@ -11,7 +11,7 @@ export const RU: Record<string, string> = {
     expenseExclSavings: "Без накоплений",
     avgDailyExpense: "Средний расход в день",
     nonZeroAvgDailyExpense: "Non-zero-days расход",
-    savings: "Отложено в этом месяце",
+    savings: "Накопления в этом месяце",
     savingsLabel: "Сбережения",
     categoriesTitle: "Траты по категориям",
     dailyExpensesTitle: "Расходы по дням",
@@ -20,4 +20,27 @@ export const RU: Record<string, string> = {
     emptyHint: "Эта заметка — финансовый дашборд. Добавьте строки в таблицу выше — карточки обновятся автоматически.",
     emptyChart: "Пока нет данных по категориям.",
     emptyDaily: "Пока нет расходов по дням.",
+
+    settingsGeneral: "Основные",
+    settingsCurrency: "Валюта",
+    settingsCurrencyDesc: "Валюта на карточках, если в заметке она не задана во frontmatter.",
+    settingsCurrencyCustom: "Своя валюта…",
+    settingsCustomCurrency: "Символ своей валюты",
+    settingsCustomCurrencyDesc: "Используется, если выбрана «Своя валюта».",
+    settingsExcludeSavings: "Исключать накопления из среднего расхода",
+    settingsExcludeSavingsDesc: "Не учитывать траты на накопления при расчёте среднего расхода за день.",
+    settingsExtraSavings: "Доп. категории накоплений",
+    settingsExtraSavingsDesc: "Ключевые слова через запятую, которые также считаются накоплениями.",
+    settingsExtraSavingsPlaceholder: "инвестиции, резерв",
+    settingsDaysInMonth: "Дней в месяце",
+    settingsDaysInMonthDesc: "Делитель для среднего расхода, если в таблице не заполнен день.",
+    settingsBudgetSection: "Бюджет",
+    settingsShowBudget: "Показывать бюджет",
+    settingsShowBudgetDesc: "Показывать отдельную диаграмму «Бюджет по категориям» с тем, насколько траты укладываются в лимиты из frontmatter заметки.",
+    budgetChartTitle: "Бюджет по категориям",
+    budgetChartEmpty: "Задайте лимиты во frontmatter заметки (budget:), чтобы видеть, как укладываетесь в бюджет.",
+    budgetTotalLabel: "Итого по бюджетам",
+    budgetRemaining: "Осталось",
+    budgetOver: "Перерасход",
+    budgetDone: "Цель выполнена",
 };

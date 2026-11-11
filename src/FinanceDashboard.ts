@@ -1,26 +1,36 @@
-import { App, MarkdownView, TFile } from "obsidian";
+import { App, getLanguage, MarkdownView, TFile } from "obsidian";
 import { CURRENT_LOCALE } from "./locale";
-import { FinanceStats } from "./types";
-import { computeStats } from "./analytics";
+import { FinanceStats, Transaction } from "./types";
+import { FinanceTrackerSettings, resolveCurrencySymbol } from "./settings";
+import { computeStats, createSavingsMatcher } from "./analytics";
 import { parseTransactions } from "./parser";
 import { StatCard, StatCardOptions } from "./components/StatCard";
 import { CategoryChart } from "./components/CategoryChart";
+import { BudgetChart } from "./components/BudgetChart";
 import { EmptyState } from "./components/EmptyState";
+import { getBudgetRows } from "./utils/budget.utils";
+import { getCategoryColors } from "./utils/tags.utils";
+
+const NUMBER_LOCALE = getLanguage() || "ru-RU";
 
 export default class FinanceDashboard {
     private app: App;
     private file: TFile;
+    private settings: FinanceTrackerSettings;
     private container: HTMLElement | null = null;
     private stats: FinanceStats | null = null;
     private currency: string = "₽";
     private savingsCategories: string[] | undefined;
     private totalSavings: string[] = [];
     private carryOver = 0;
+    private budgets = new Map<string, number>();
+    private transactions: Transaction[] = [];
     private renderId = 0;
 
-    constructor(app: App, file: TFile) {
+    constructor(app: App, file: TFile, settings: FinanceTrackerSettings) {
         this.app = app;
         this.file = file;
+        this.settings = settings;
     }
 
     async mount(el: HTMLElement): Promise<void> {
@@ -74,15 +84,24 @@ export default class FinanceDashboard {
         const id = ++this.renderId;
         const cache = this.app.metadataCache.getFileCache(this.file);
         const fm = cache?.frontmatter as FinanceFrontmatter | undefined;
-        this.currency = fm?.currency || "₽";
-        this.savingsCategories = this.parseSavingsCategories(fm?.savingsCategory);
+        this.currency = fm?.currency || resolveCurrencySymbol(this.settings);
+        this.savingsCategories = [
+            ...(this.parseSavingsCategories(fm?.savingsCategory) ?? []),
+            ...this.parseExtraSavingsCategories(this.settings.extraSavingsCategories),
+        ];
         this.totalSavings = this.parseTotalSavings(fm?.totalSavings);
         this.carryOver = this.parseNumber(fm?.carryOver);
+        this.budgets = this.parseBudgets(fm?.budget);
 
         const content = await this.readContent();
         if (id !== this.renderId) return;
 
-        this.stats = computeStats(parseTransactions(content), { savingsCategories: this.savingsCategories });
+        this.transactions = parseTransactions(content);
+        this.stats = computeStats(this.transactions, {
+            savingsCategories: this.savingsCategories,
+            excludeSavingsFromAverage: this.settings.excludeSavingsFromAverage,
+            daysInMonth: this.settings.daysInMonth,
+        });
         this.render();
     }
 
@@ -100,9 +119,29 @@ export default class FinanceDashboard {
         return undefined;
     }
 
+    private parseExtraSavingsCategories(raw: string): string[] {
+        return raw
+            .split(/[\n,;]+/)
+            .map((item) => item.trim())
+            .filter(Boolean);
+    }
+
     private parseNumber(raw: unknown): number {
         const value = typeof raw === "number" ? raw : parseFloat(String(raw));
         return Number.isFinite(value) ? value : 0;
+    }
+
+    private parseBudgets(raw: unknown): Map<string, number> {
+        const result = new Map<string, number>();
+        if (!raw || typeof raw !== "object" || Array.isArray(raw)) return result;
+
+        for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+            const name = key.trim();
+            const amount = this.parseNumber(value);
+            if (!name || amount <= 0) continue;
+            result.set(name, amount);
+        }
+        return result;
     }
 
     private parseTotalSavings(raw: unknown): string[] {
@@ -142,7 +181,17 @@ export default class FinanceDashboard {
         }
 
         this.renderOverviewCards();
-        this.renderCategoryChart();
+
+        const categoryStats = [...this.stats!.categories, ...this.stats!.savingsCategories];
+
+        // One palette for both charts so a category keeps the same color everywhere.
+        const colorMap = getCategoryColors([
+            ...categoryStats.map((cat) => cat.category),
+            ...this.budgets.keys(),
+        ]);
+
+        this.renderCategoryChart(colorMap);
+        this.renderBudgetChart(colorMap);
     }
 
     private renderOverviewCards(): void {
@@ -180,8 +229,15 @@ export default class FinanceDashboard {
             {
                 icon: "piggy-bank",
                 label: CURRENT_LOCALE.savingsLabel,
-                value: this.totalSavings.join(" / "),
-                sub: savedThisMonth > 0 ? `${CURRENT_LOCALE.savings}: ${this.formatAmount(savedThisMonth)}` : undefined,
+                value: this.totalSavings.length
+                    ? this.totalSavings.join(" / ")
+                    : this.formatAmount(savedThisMonth),
+                sub: this.totalSavings.length && savedThisMonth !== 0
+                    ? `${CURRENT_LOCALE.savings}: ${this.formatAmount(savedThisMonth)}`
+                    : undefined,
+                tone: !this.totalSavings.length && savedThisMonth !== 0
+                    ? (savedThisMonth > 0 ? "pos" : "neg")
+                    : "",
             },
         ];
 
@@ -190,18 +246,42 @@ export default class FinanceDashboard {
         }
     }
 
-    private renderCategoryChart(): void {
+    private renderCategoryChart(colorMap: Map<string, string>): void {
         new CategoryChart({
             title: CURRENT_LOCALE.categoriesTitle,
             emptyText: CURRENT_LOCALE.emptyChart,
             categories: this.stats!.categories,
             totalExpense: this.stats!.expenseExclSavings,
             formatAmount: (value) => this.formatAmount(value),
+            colorMap,
+        }).render(this.container!);
+    }
+
+    private renderBudgetChart(colorMap: Map<string, string>): void {
+        if (!this.settings.showBudget || !this.budgets.size) return;
+
+        const rows = getBudgetRows(
+            this.transactions,
+            this.budgets,
+            createSavingsMatcher(this.savingsCategories),
+        );
+        if (!rows.length) return;
+
+        new BudgetChart({
+            title: CURRENT_LOCALE.budgetChartTitle,
+            emptyText: CURRENT_LOCALE.budgetChartEmpty,
+            totalLabel: CURRENT_LOCALE.budgetTotalLabel,
+            remainingLabel: CURRENT_LOCALE.budgetRemaining,
+            overLabel: CURRENT_LOCALE.budgetOver,
+            doneLabel: CURRENT_LOCALE.budgetDone,
+            rows,
+            formatAmount: (value) => this.formatAmount(value),
+            colorMap,
         }).render(this.container!);
     }
 
     private formatAmount(value: number): string {
-        const abs = Math.abs(value).toLocaleString("ru-RU", { maximumFractionDigits: 2 });
+        const abs = Math.abs(value).toLocaleString(NUMBER_LOCALE, { maximumFractionDigits: 2 });
         const prefix = value < 0 ? "−" : "";
         return `${prefix}${abs} ${this.currency}`;
     }

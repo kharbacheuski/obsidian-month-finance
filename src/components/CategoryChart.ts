@@ -1,5 +1,6 @@
+import { setTooltip } from "obsidian";
 import { CategoryStat } from "../types";
-import { getCategoryColors, getCategoryVariants } from "../utils/tags.utils";
+import { getCategoryColors, getCategoryVariants, resolveCategoryColor } from "../utils/tags.utils";
 
 export interface CategoryChartOptions {
     title: string;
@@ -7,6 +8,7 @@ export interface CategoryChartOptions {
     categories: CategoryStat[];
     totalExpense: number;
     formatAmount: (value: number) => string;
+    colorMap?: Map<string, string>;
 }
 
 export class CategoryChart {
@@ -28,19 +30,16 @@ export class CategoryChart {
         }
 
         const bars = card.createDiv({ cls: "finance-bars" });
-        const colorMap = getCategoryColors(categories.map((cat) => cat.category));
+        const colorMap = this.opts.colorMap ?? getCategoryColors(categories.map((cat) => cat.category));
 
         for (const cat of categories) {
             const percent = Math.round((cat.expense / totalExpense) * 100);
-            const color = colorMap.get(cat.category) ?? "";
+            const color = resolveCategoryColor(colorMap, cat.category);
             const segments = this.getSegments(cat);
 
             const row = bars.createDiv({ cls: "finance-bar-row" });
-            row.createDiv({
-                cls: "finance-bar-label",
-                text: cat.category,
-                attr: { title: this.buildGroupTooltip(cat, segments) },
-            });
+            const labelEl = row.createDiv({ cls: "finance-bar-label", text: cat.category });
+            setTooltip(labelEl, this.buildGroupTooltip(cat, segments), { placement: "top" });
 
             const track = row.createDiv({ cls: "finance-bar-track" });
             // The fill takes only the category's share of the whole bar,
@@ -57,13 +56,13 @@ export class CategoryChart {
                     ? `${segment.label}: ${this.opts.formatAmount(segment.expense)} (${share}%)`
                     : `${segment.category}: ${this.opts.formatAmount(segment.expense)}`;
 
-                fill.createDiv({
+                const segmentEl = fill.createDiv({
                     cls: "finance-bar-segment",
                     attr: {
                         style: `flex:${Math.max(segment.expense, 0.0001)} 1 0;background-color:${segmentColors[index]};`,
-                        "aria-label": tooltip,
                     },
                 });
+                setTooltip(segmentEl, tooltip, { placement: "top" });
             });
 
             row.createDiv({ cls: "finance-bar-value", text: `${this.opts.formatAmount(cat.expense)} · ${percent}%` });
@@ -78,9 +77,8 @@ export class CategoryChart {
     }
 
     private buildGroupTooltip(cat: CategoryStat, segments: CategoryStat[]): string {
-        if (segments.length <= 1) return cat.category;
-        return segments
-            .map((segment) => `${segment.label}: ${this.opts.formatAmount(segment.expense)}`)
-            .join("\n");
+        if (segments.length <= 1) return `${cat.category}: ${this.opts.formatAmount(cat.expense)}`;
+        const parts = segments.map((segment) => `${segment.label}: ${this.opts.formatAmount(segment.expense)}`);
+        return [`${cat.category}: ${this.opts.formatAmount(cat.expense)}`, ...parts].join(" · ");
     }
 }

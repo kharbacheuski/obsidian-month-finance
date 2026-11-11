@@ -2,12 +2,23 @@ import { MarkdownView, Plugin, TAbstractFile, TFile } from "obsidian";
 import FinanceDashboard from "./FinanceDashboard";
 import { CURRENT_LOCALE } from "./locale";
 import { createFinanceNote } from "./utils/frontmatter.utils";
+import {
+    DEFAULT_SETTINGS,
+    FinanceSettingTab,
+    FinanceTrackerSettings,
+    resolveCurrencySymbol,
+} from "./settings";
 
 export default class FinanceTrackerPlugin extends Plugin {
+    settings: FinanceTrackerSettings = { ...DEFAULT_SETTINGS };
     private dashboards = new Map<string, FinanceDashboard>();
     private refreshQueue = new Set<string>();
 
-    onload() {
+    async onload() {
+        await this.loadSettings();
+
+        this.addSettingTab(new FinanceSettingTab(this.app, this));
+
         this.addRibbonIcon("wallet", CURRENT_LOCALE.createFinance, () => {
             void this.createAndOpenFinanceNote();
         });
@@ -32,7 +43,7 @@ export default class FinanceTrackerPlugin extends Plugin {
 
             this.dashboards.get(file.path)?.remove();
 
-            const dashboard = new FinanceDashboard(this.app, file);
+            const dashboard = new FinanceDashboard(this.app, file, this.settings);
             this.dashboards.set(file.path, dashboard);
             void dashboard.mount(el);
         });
@@ -82,6 +93,20 @@ export default class FinanceTrackerPlugin extends Plugin {
         this.dashboards.clear();
     }
 
+    async loadSettings(): Promise<void> {
+        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    }
+
+    async saveSettings(): Promise<void> {
+        await this.saveData(this.settings);
+    }
+
+    async refreshDashboards(): Promise<void> {
+        for (const dashboard of this.dashboards.values()) {
+            if (dashboard.isAttached()) await dashboard.refresh();
+        }
+    }
+
     private queueRefresh(file: TAbstractFile | null): void {
         if (!(file instanceof TFile)) return;
         if (this.refreshQueue.has(file.path)) return;
@@ -95,7 +120,7 @@ export default class FinanceTrackerPlugin extends Plugin {
     }
 
     private async createAndOpenFinanceNote() {
-        const file = await createFinanceNote(this.app);
+        const file = await createFinanceNote(this.app, resolveCurrencySymbol(this.settings));
         if (!file) return;
 
         await this.app.workspace.getLeaf(false).openFile(file);

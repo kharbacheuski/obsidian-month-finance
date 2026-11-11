@@ -52,6 +52,36 @@ export function getCategoryColor(category: string): string {
     return CATEGORY_PALETTE[hashString(category.toLowerCase()) % CATEGORY_PALETTE.length];
 }
 
+function lookupColor(map: Map<string, string>, category: string): string | undefined {
+    const direct = map.get(category);
+    if (direct) return direct;
+
+    const normalized = category.trim().toLowerCase();
+    for (const [key, value] of map) {
+        if (key.trim().toLowerCase() === normalized) return value;
+    }
+    return undefined;
+}
+
+/**
+ * Finds a category color, falling back to the closest parent category so that
+ * `Food.Groceries` inherits the color of `Food`.
+ */
+export function resolveCategoryColor(colorMap: Map<string, string> | undefined, category: string): string {
+    if (colorMap) {
+        let current = category.trim();
+        while (current) {
+            const color = lookupColor(colorMap, current);
+            if (color) return color;
+
+            const dot = current.lastIndexOf(".");
+            if (dot <= 0) break;
+            current = current.slice(0, dot);
+        }
+    }
+    return getCategoryColor(category);
+}
+
 export function getCategoryColors(categories: string[]): Map<string, string> {
     const ordered = [...new Set(categories)].sort((a, b) => a.localeCompare(b));
     const result = new Map<string, string>();

@@ -27,6 +27,7 @@ export interface FinanceStats {
     daysElapsed: number;
     spendDaysCount: number;
     categories: CategoryStat[];
+    savingsCategories: CategoryStat[];
 }
 
 declare global {
@@ -36,5 +37,6 @@ declare global {
         savingsCategory?: string | string[];
         totalSavings?: number | string | Array<number | string>;
         carryOver?: number;
+        budget?: Record<string, number | string>;
     }
 }

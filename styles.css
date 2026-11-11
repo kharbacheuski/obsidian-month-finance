@@ -110,7 +110,7 @@
 
 .finance-bar-row {
     display: grid;
-    grid-template-columns: minmax(90px, 130px) 1fr 120px;
+    grid-template-columns: minmax(0, 5rem) minmax(0, 1fr) minmax(0, 6.5rem);
     align-items: center;
     gap: 0.6rem;
     font-size: var(--font-ui-small);
@@ -152,8 +152,131 @@
 .finance-bar-value {
     text-align: right;
     white-space: nowrap;
+    font-size: var(--font-ui-smaller);
     font-variant-numeric: tabular-nums;
     color: var(--text-muted);
+}
+
+.finance-budget-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 0.8rem;
+}
+
+.finance-budget-summary-text {
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.finance-budget-summary-text.over {
+    color: var(--color-red, #e53935);
+    font-weight: 600;
+}
+
+.finance-budget-summary-track {
+    height: 0.45rem;
+    background: var(--background-modifier-border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.finance-budget-summary-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--interactive-accent);
+    transition: width 0.3s ease;
+}
+
+.finance-budget-chart {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(52px, 120px);
+    gap: 0.6rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+}
+
+.finance-budget-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 0;
+}
+
+.finance-budget-pct {
+    font-size: var(--font-ui-smaller);
+    line-height: 1.2;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.finance-budget-pct.over {
+    color: var(--color-red, #e53935);
+    font-weight: 600;
+}
+
+.finance-budget-pct.done {
+    color: var(--color-green, #5cbb6a);
+    font-weight: 600;
+}
+
+.finance-budget-over {
+    margin-left: 0.15rem;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.finance-budget-plot {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    height: 120px;
+}
+
+/* Every column shares the same 100% scale: the fill shows how much of the limit is used. */
+.finance-budget-track {
+    position: relative;
+    width: 60%;
+    max-width: 32px;
+    height: 100%;
+    background: var(--background-modifier-border);
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+}
+
+.finance-budget-spent {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: height 0.3s ease;
+}
+
+.finance-budget-limit {
+    max-width: 100%;
+    font-size: var(--font-ui-smaller);
+    line-height: 1.2;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.finance-budget-name {
+    width: 100%;
+    font-size: var(--font-ui-smaller);
+    line-height: 1.2;
+    color: var(--text-muted);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .finance-daily-wrap {
@@ -259,4 +382,52 @@
 .finance-muted {
     color: var(--text-muted);
     font-size: var(--font-ui-small);
+}
+
+@media (max-width: 600px) {
+    .finance-dashboard {
+        margin: 0.5rem 0;
+    }
+
+    .finance-cards {
+        grid-template-columns: 1fr;
+        gap: 0.6rem;
+    }
+
+    .finance-cards > .finance-card {
+        grid-column: 1 / -1;
+        padding: 0.85rem 0.9rem;
+    }
+
+    .finance-bar-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "label value"
+            "track track";
+        row-gap: 0.4rem;
+    }
+
+    .finance-budget-chart {
+        grid-auto-columns: minmax(46px, 1fr);
+        gap: 0.45rem;
+    }
+
+    .finance-budget-plot {
+        height: 96px;
+    }
+
+    .finance-bar-label {
+        grid-area: label;
+        white-space: normal;
+    }
+
+    .finance-bar-track {
+        grid-area: track;
+        height: 0.7rem;
+    }
+
+    .finance-bar-value {
+        grid-area: value;
+        text-align: right;
+    }
 }

@@ -7,6 +7,8 @@ export interface Transaction {
     type: TransactionType;
     category: string;
     amount: number;
+    /** Optional description from the "Name" column, used by the top expenses table. */
+    name?: string;
 }
 
 export interface CategoryStat {

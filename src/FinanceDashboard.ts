@@ -7,8 +7,10 @@ import { parseTransactions } from "./parser";
 import { StatCard, StatCardOptions } from "./components/StatCard";
 import { CategoryChart } from "./components/CategoryChart";
 import { BudgetChart } from "./components/BudgetChart";
+import { TopExpensesTable } from "./components/TopExpensesTable";
 import { EmptyState } from "./components/EmptyState";
 import { getBudgetRows } from "./utils/budget.utils";
+import { getTopExpenses } from "./utils/top-expenses.utils";
 import { getCategoryColors } from "./utils/tags.utils";
 
 const NUMBER_LOCALE = getLanguage() || "ru-RU";
@@ -26,6 +28,9 @@ export default class FinanceDashboard {
     private budgets = new Map<string, number>();
     private transactions: Transaction[] = [];
     private renderId = 0;
+    // Kept on the instance so the accordion state survives dashboard re-renders.
+    private topExpensesCollapsed = false;
+    private budgetCollapsed = false;
 
     constructor(app: App, file: TFile, settings: FinanceTrackerSettings) {
         this.app = app;
@@ -192,6 +197,7 @@ export default class FinanceDashboard {
 
         this.renderCategoryChart(colorMap);
         this.renderBudgetChart(colorMap);
+        this.renderTopExpenses(colorMap);
     }
 
     private renderOverviewCards(): void {
@@ -277,6 +283,38 @@ export default class FinanceDashboard {
             rows,
             formatAmount: (value) => this.formatAmount(value),
             colorMap,
+            collapsed: this.budgetCollapsed,
+            onToggle: (collapsed) => {
+                this.budgetCollapsed = collapsed;
+            },
+        }).render(this.container!);
+    }
+
+    private renderTopExpenses(colorMap: Map<string, string>): void {
+        if (!this.settings.showTopExpenses) return;
+
+        const rows = getTopExpenses(
+            this.transactions,
+            this.settings.topExpensesCount,
+            createSavingsMatcher(this.savingsCategories),
+        );
+
+        new TopExpensesTable({
+            title: CURRENT_LOCALE.topExpensesTitle,
+            emptyText: CURRENT_LOCALE.topExpensesEmpty,
+            columnExpense: CURRENT_LOCALE.topExpensesColumnExpense,
+            columnDay: CURRENT_LOCALE.topExpensesColumnDay,
+            columnAmount: CURRENT_LOCALE.topExpensesColumnAmount,
+            operationsLabel: CURRENT_LOCALE.topExpensesOperations,
+            shownSumLabel: CURRENT_LOCALE.topExpensesShownSum,
+            rows,
+            totalExpense: this.stats!.expenseExclSavings,
+            formatAmount: (value) => this.formatAmount(value),
+            colorMap,
+            collapsed: this.topExpensesCollapsed,
+            onToggle: (collapsed) => {
+                this.topExpensesCollapsed = collapsed;
+            },
         }).render(this.container!);
     }
 

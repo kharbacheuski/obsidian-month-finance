@@ -84,6 +84,9 @@ function tryParseTable(rows: string[]): Transaction[] | null {
     if (!columns.has("type") && !columns.has("category") && !columns.has("name")) return null;
 
     const transactions: Transaction[] = [];
+    // A row without a day inherits the closest day above it, so a series of
+    // expenses on the 3rd does not need "03" repeated on every line.
+    let lastDay = 0;
 
     for (let i = headerIdx + 1; i < rows.length; i++) {
         if (isSeparatorRow(rows[i])) continue;
@@ -104,9 +107,12 @@ function tryParseTable(rows: string[]): Transaction[] | null {
         if (!type) type = amount >= 0 ? "income" : "expense";
 
         const category = get("category") || "Без категории";
-        const day = parseDay(get("day"));
+        const rowDay = parseDay(get("day"));
+        if (rowDay > 0) lastDay = rowDay;
+        const day = rowDay > 0 ? rowDay : lastDay;
+        const name = get("name");
 
-        transactions.push({ day, type, category, amount });
+        transactions.push({ day, type, category, amount, name: name || undefined });
     }
 
     return transactions;

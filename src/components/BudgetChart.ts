@@ -1,4 +1,5 @@
 import { setTooltip } from "obsidian";
+import { AccordionCard } from "./AccordionCard";
 import { BudgetRow, formatBudgetPercent } from "../utils/budget.utils";
 import { getCategoryColors, resolveCategoryColor } from "../utils/tags.utils";
 
@@ -12,6 +13,15 @@ export interface BudgetChartOptions {
     rows: BudgetRow[];
     formatAmount: (value: number) => string;
     colorMap?: Map<string, string>;
+    collapsed: boolean;
+    onToggle?: (collapsed: boolean) => void;
+}
+
+interface BudgetTotals {
+    spent: number;
+    budget: number;
+    percent: number;
+    over: boolean;
 }
 
 export class BudgetChart {
@@ -22,18 +32,29 @@ export class BudgetChart {
     }
 
     render(parent: HTMLElement): HTMLElement {
-        const card = parent.createDiv({ cls: "finance-card finance-card-budget" });
-        card.createDiv({ cls: "finance-card-title", text: this.opts.title });
-
         const rows = this.opts.rows;
+        const totals = this.getTotals(rows);
+
+        const { card, body } = new AccordionCard({
+            title: this.opts.title,
+            cls: "finance-card-budget",
+            meta: rows.length ? `${totals.percent}%` : undefined,
+            metaCls: totals.over ? "over" : "",
+            metaTooltip: rows.length
+                ? `${this.opts.totalLabel}: ${this.opts.formatAmount(totals.spent)} / ${this.opts.formatAmount(totals.budget)}`
+                : undefined,
+            collapsed: this.opts.collapsed,
+            onToggle: this.opts.onToggle,
+        }).render(parent);
+
         if (!rows.length) {
-            card.createDiv({ cls: "finance-muted", text: this.opts.emptyText });
+            body.createDiv({ cls: "finance-muted", text: this.opts.emptyText });
             return card;
         }
 
-        this.renderSummary(card, rows);
+        this.renderSummary(body, totals);
 
-        const chart = card.createDiv({ cls: "finance-budget-chart" });
+        const chart = body.createDiv({ cls: "finance-budget-chart" });
         const colorMap = this.opts.colorMap ?? getCategoryColors(rows.map((row) => row.category));
 
         for (const row of rows) {
@@ -90,7 +111,7 @@ export class BudgetChart {
         ].join(" · ");
     }
 
-    private renderSummary(card: HTMLElement, rows: BudgetRow[]): void {
+    private getTotals(rows: BudgetRow[]): BudgetTotals {
         const spent = rows.reduce((sum, row) => sum + row.spent, 0);
         const budget = rows.reduce((sum, row) => sum + row.budget, 0);
         const percent = budget > 0 ? Math.round((spent / budget) * 100) : 0;
@@ -101,7 +122,13 @@ export class BudgetChart {
         const spendBudget = spendRows.reduce((sum, row) => sum + row.budget, 0);
         const over = spendBudget > 0 && spendTotal > spendBudget;
 
-        const summary = card.createDiv({ cls: "finance-budget-summary" });
+        return { spent, budget, percent, over };
+    }
+
+    private renderSummary(parent: HTMLElement, totals: BudgetTotals): void {
+        const { spent, budget, percent, over } = totals;
+
+        const summary = parent.createDiv({ cls: "finance-budget-summary" });
         summary.createDiv({
             cls: `finance-budget-summary-text${over ? " over" : ""}`,
             text: `${this.opts.totalLabel}: ${this.opts.formatAmount(spent)} / ${this.opts.formatAmount(budget)} · ${percent}%`,

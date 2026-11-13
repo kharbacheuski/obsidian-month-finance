@@ -384,6 +384,175 @@
     font-size: var(--font-ui-small);
 }
 
+/* Collapsible dashboard sections (budget chart, top expenses). */
+.finance-accordion-card {
+    padding: 0.45rem 0.55rem;
+}
+
+.finance-accordion-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    height: auto;
+    padding: 0.35rem 0.45rem;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: var(--radius-s);
+    cursor: pointer;
+    color: var(--text-normal);
+    font-size: var(--font-ui-medium);
+    font-weight: 600;
+    text-align: left;
+}
+
+.finance-accordion-header:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.finance-accordion-chevron {
+    display: inline-flex;
+    align-items: center;
+    color: var(--text-muted);
+    transition: transform 0.15s ease;
+}
+
+.finance-accordion-chevron .svg-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.finance-accordion-card.is-collapsed .finance-accordion-chevron {
+    transform: rotate(-90deg);
+}
+
+.finance-accordion-title {
+    flex: 1 1 auto;
+}
+
+.finance-accordion-meta {
+    font-size: var(--font-ui-smaller);
+    font-weight: 500;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.finance-accordion-meta.over {
+    color: var(--color-red, #e53935);
+    font-weight: 600;
+}
+
+.finance-accordion-card.is-collapsed .finance-accordion-body {
+    display: none;
+}
+
+.finance-accordion-body {
+    padding: 0.15rem 0.45rem 0.35rem;
+    overflow-x: auto;
+}
+
+.finance-top-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-ui-small);
+}
+
+.finance-top-table th {
+    padding: 0.3rem 0.4rem;
+    border: none;
+    border-bottom: 1px solid var(--background-modifier-border);
+    background: transparent;
+    color: var(--text-faint);
+    font-size: var(--font-ui-smaller);
+    font-weight: 500;
+    text-align: left;
+}
+
+.finance-top-table td {
+    padding: 0.4rem;
+    border: none;
+    border-bottom: 1px solid var(--background-modifier-border);
+    background: transparent;
+    vertical-align: middle;
+}
+
+.finance-top-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.finance-top-table tbody tr:hover td {
+    background: var(--background-modifier-hover);
+}
+
+.finance-top-rank {
+    width: 1.6rem;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.finance-top-day {
+    width: 4.5rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.finance-top-amount {
+    width: 8rem;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.finance-top-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.finance-top-dot {
+    flex: 0 0 auto;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+}
+
+.finance-top-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.finance-top-name {
+    color: var(--text-normal);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.finance-top-cat {
+    font-size: var(--font-ui-smaller);
+    color: var(--text-faint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.finance-top-sum {
+    font-weight: 600;
+}
+
+.finance-top-share {
+    margin-left: 0.4rem;
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+}
+
 @media (max-width: 600px) {
     .finance-dashboard {
         margin: 0.5rem 0;
@@ -429,5 +598,17 @@
     .finance-bar-value {
         grid-area: value;
         text-align: right;
+    }
+
+    .finance-top-day {
+        width: 2.6rem;
+    }
+
+    .finance-top-amount {
+        width: auto;
+    }
+
+    .finance-top-share {
+        display: none;
     }
 }

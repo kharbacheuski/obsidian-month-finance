@@ -9,6 +9,8 @@ export interface FinanceTrackerSettings {
     extraSavingsCategories: string;
     daysInMonth: number;
     showBudget: boolean;
+    showTopExpenses: boolean;
+    topExpensesCount: number;
 }
 
 export const DEFAULT_SETTINGS: FinanceTrackerSettings = {
@@ -18,6 +20,8 @@ export const DEFAULT_SETTINGS: FinanceTrackerSettings = {
     extraSavingsCategories: "",
     daysInMonth: 30,
     showBudget: true,
+    showTopExpenses: true,
+    topExpensesCount: 5,
 };
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -113,7 +117,7 @@ export class FinanceSettingTab extends PluginSettingTab {
                 });
             });
 
-        new Setting(containerEl).setHeading().setName(CURRENT_LOCALE.settingsBudgetSection);
+        new Setting(containerEl).setHeading().setName(CURRENT_LOCALE.settingsSections);
 
         new Setting(containerEl)
             .setName(CURRENT_LOCALE.settingsShowBudget)
@@ -123,6 +127,40 @@ export class FinanceSettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.showBudget)
                     .onChange((value) => this.update("showBudget", value)),
             );
+
+        new Setting(containerEl)
+            .setName(CURRENT_LOCALE.settingsShowTopExpenses)
+            .setDesc(CURRENT_LOCALE.settingsShowTopExpensesDesc)
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.showTopExpenses)
+                    .onChange(async (value) => {
+                        await this.update("showTopExpenses", value);
+                        // Refresh the tab so the row count dropdown follows the toggle state.
+                        this.display();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName(CURRENT_LOCALE.settingsTopExpensesCount)
+            .setDesc(CURRENT_LOCALE.settingsTopExpensesCountDesc)
+            .setDisabled(!this.plugin.settings.showTopExpenses)
+            .addText((text) => {
+                text.inputEl.type = "number";
+                text.inputEl.min = "1";
+                text.inputEl.max = "100";
+                text.setPlaceholder("5")
+                    .setValue(String(this.plugin.settings.topExpensesCount))
+                    .onChange((value) => {
+                        const parsed = parseInt(value, 10);
+                        if (!Number.isFinite(parsed) || parsed < 1 || parsed > 100) return;
+                        void this.update("topExpensesCount", parsed);
+                    });
+                // Show the stored value again if the input was left invalid or out of range.
+                text.inputEl.addEventListener("blur", () => {
+                    text.setValue(String(this.plugin.settings.topExpensesCount));
+                });
+            });
     }
 
     private async update<K extends keyof FinanceTrackerSettings>(
